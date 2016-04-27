@@ -2,7 +2,7 @@
 # Effective Distances on Complex Networks
 
 The effective distance is an alternative distance metric, which takes into account the local topology of the network and the fluxes along the edges. It has been introduced to predict the time that an infection needs in order to spread from a given source node to a specific target.
-The different approaches are based on the intuition, that large fluxes and few neighbors decrease the transmission time to an adjacent node.
+The different approaches are based on the intuition, that large fluxes and few neighbours decrease the transmission time to an adjacent node.
 
 We provide a set of methods, which allow to compare different approaches:
 
@@ -19,11 +19,13 @@ Iannelli, F., Koher, A., Hoevel, P. and Sokolov, I.M. _Effective Distances in Co
 ---
 # Required Software
 
-Please download the files either using the link or, open a terminal and type
+Please download the files either using the [link](https://gitlab.tubit.tu-berlin.de/hoevel_group/effective_distance/repository/archive.zip "Download all files.") or, open a terminal and type
 
 ```
-git clone ...git
+git clone git@gitlab.tubit.tu-berlin.de:hoevel_group/effective_distance.git 
 ```
+The user name and password are the same as for the TUBIT account.
+
 The package uses functionalities from numpy, scipy and networkx. You can check your versions against those, which I used by executing the script in your terminal:
 
 ```
@@ -44,8 +46,8 @@ If your version differs, it is still likely to work anyway.
 ---
 # Step 1: Import the package
 
-In order to import the package into your python progrann, you will can put the files into the same directory.
-Alternatively, make them visible to python by typing adding the directory to the `PYTHONPATH` variable or enter the following command to the beginning of your python script: 
+In order to import the package into your python program, you can put the files into the same directory.
+Alternatively, make them visible to python by adding the directory to the `PYTHONPATH` variable or enter the following command to the beginning of your python script: 
 ```python
 from sys import path
 path.append('<directory/to/effective_distance.py>')
@@ -59,7 +61,7 @@ import effective_distance as ed
 # Step 2: Load the network
 
 
-We assume, that the mobility network is stored in a comma seperated file (.csv) following the convention SOURCE, TARGET, FLUX. The node IDs are interpreted as integers and have to run from 0 to number_of_nodes - 1. The fluxes have to be positive and will be saved as float numbers.
+We assume, that the mobility network is stored in a comma separated file (.csv) following the convention SOURCE, TARGET, FLUX. The node IDs are interpreted as integers and have to run from 0 to number_of_nodes - 1. The fluxes have to be positive and will be saved as float numbers.
 ```python
 myEffectiveDistance = ed.EffectiveDistances("data/US_largest500_airportnetwork.csv")
 ```
@@ -70,6 +72,8 @@ The graph is now stored in the attribute myEffectiveDistance.graph as a NetworkX
 We provide three methods to calculate the effective distance, as introduced in the beginning. If the source and target is specified a number is returned. Otherwise, if one is set to `None` or both an array is returned.
 
 ```python
+source, target = 0, 100
+
 # Dominant path effective distance
 DPED = myEffectiveDistance.get_dominant_path_distance(source, target)
 
@@ -78,7 +82,7 @@ cutoff = range(5)
 MPED = []
 for c in cutoff:
     MPED.append(
-        myEffectiveDistance.get_multiple_path_distance(source, target, cutoff=c)
+        myEffectiveDistance.get_multiple_path_distance(source, target, cutoff=c) #ATTENTION: source = target = None can take a couple of days... So you better enjoy a long weekend now.
         )
 
 #Random walk effective distance
@@ -87,7 +91,7 @@ RWED = myEffectiveDistance.get_random_walk_distance(source, target)
 
 # Step 4: Plot the results
 
-We can use the commonly used matplotlib package in order to display the results:
+The commonly used matplotlib package offers all we need. It is not a feast for the eyes, but serves us well enough:
 
 ```python
 import matplotlib.pyplot as plt
