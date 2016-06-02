@@ -19,10 +19,10 @@ Iannelli, F., Koher, A., Hoevel, P. and Sokolov, I.M. _Effective Distances in Co
 ---
 # Required Software
 
-Please download the files either using the [link](https://gitlab.tubit.tu-berlin.de/hoevel_group/effective_distance/repository/archive.zip "Download all files.") or, open a terminal and type
+Please download the files either using the link or, open a terminal and type
 
 ```
-git clone git@gitlab.tubit.tu-berlin.de:hoevel_group/effective_distance.git 
+git clone https://github.com/andreaskoher/effective_distance.git
 ```
 The user name and password are the same as for the TUBIT account.
 
@@ -63,7 +63,7 @@ import effective_distance as ed
 
 We assume, that the mobility network is stored in a comma separated file (.csv) following the convention SOURCE, TARGET, FLUX. The node IDs are interpreted as integers and have to run from 0 to number_of_nodes - 1. The fluxes have to be positive and will be saved as float numbers.
 ```python
-myEffectiveDistance = ed.EffectiveDistances("data/US_largest500_airportnetwork.csv")
+myEffectiveDistance = ed.EffectiveDistances("US_largest500_airportnetwork.csv")
 ```
 The graph is now stored in the attribute myEffectiveDistance.graph as a NetworkX type DiGraph. In order to avoid singularities in later calculations, the giant strongly connected component has been stored only.
 
