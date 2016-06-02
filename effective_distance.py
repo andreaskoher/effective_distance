@@ -83,7 +83,7 @@ class EffectiveDistances:
             else:
                 if verbose:
                     print "ignore self loop at node", u
-
+        '''
         symmetric = True
         for s,t,w in G.edges(data=True):
             w1 = G[s][t]["weight"]
@@ -100,7 +100,7 @@ class EffectiveDistances:
         if verbose:
             if not symmetric:
                 print "The network has been symmetrisized."
-        
+        '''
         
         ccs = strongly_connected_component_subgraphs(G)
         ccs = sorted(ccs, key=len, reverse=True)
