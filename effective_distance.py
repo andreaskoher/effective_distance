@@ -2,7 +2,7 @@ import numpy as np
 from numpy import genfromtxt, log, array, exp, save
 from networkx import DiGraph, shortest_path_length, adjacency_matrix, shortest_path, all_simple_paths, strongly_connected_component_subgraphs
 from scipy.linalg import inv
-
+from tqdm import tqdm
 
 ###############################################################################
 
@@ -48,10 +48,15 @@ class EffectiveDistances:
         --------
             The graph is saved internally in self.graph.
                 
-        """    
-        dtype     = kwargs["dtype"] if "dtype" in kwargs else float
-        delimiter = kwargs["delimiter"] if "delimiter" in kwargs else ","
-        source, target, flux = genfromtxt(fname, delimiter=delimiter, dtype=dtype, unpack=True)
+        """
+        delimiter = kwargs["delimiter"]      if "delimiter"      in kwargs.keys() else " "
+        
+        data = np.genfromtxt(fname, delimiter=delimiter, dtype=int, unpack=False)
+        source, target = data[:,0], data[:,1]
+        if data.shape[1] > 2:
+            flux = data[:,2]
+        else:
+            flux = np.ones_like(source)
         nodes  = set(source) | set(target)
         self.nodes = len(nodes)
         lines  = len(flux)
@@ -65,7 +70,6 @@ class EffectiveDistances:
                 print "Node IDs have been changed according to the requirement.\n-----------------------------------\n"
                 
         
-        if verbose:
             print 'Lines: ',lines , ', Nodes: ', self.nodes
             print '-----------------------------------\nData Structure:\n\nsource,    target,    weight \n'
             for ii in range(7):            
@@ -75,15 +79,15 @@ class EffectiveDistances:
         
         G = DiGraph()         # Empty, directed Graph
         G.add_nodes_from(range(self.nodes))
-        for ii in range(lines):
-            u, v, w = int(source[ii]), int(target[ii]), flux[ii]
+        for ii in xrange(lines):
+            u, v, w = int(source[ii]), int(target[ii]), float(flux[ii])
             if u != v: # ignore self loops
                 assert not G.has_edge(u,v), "Edge appeared twice - not supported"                    
                 G.add_edge(u,v,weight=w)
             else:
                 if verbose:
                     print "ignore self loop at node", u
-        '''
+        
         symmetric = True
         for s,t,w in G.edges(data=True):
             w1 = G[s][t]["weight"]
@@ -91,16 +95,17 @@ class EffectiveDistances:
                 w2 = G[t][s]["weight"]
             except KeyError:
                 symmetric = False
-                G.add_edge(t,s,{"weight":w1})
+                G.add_edge(t,s,weight=w1)
                 w2 = w1
             if w1 != w2:
                 symmetric = False
                 G[s][t]["weight"] += G[t][s]["weight"]
+                G[s][t]["weight"] /= 2
                 G[t][s]["weight"]  = G[s][t]["weight"]
         if verbose:
             if not symmetric:
-                print "The network has been symmetrisized."
-        '''
+                print "The network has been symmetricised."
+        
         
         ccs = strongly_connected_component_subgraphs(G)
         ccs = sorted(ccs, key=len, reverse=True)
@@ -183,7 +188,7 @@ class EffectiveDistances:
         assert self.graph != None, "Load graph first."        
         
         if parameter != 1:
-            for n,m,data in G.edges_iter(data=True):
+            for n,m,data in self.graph.edges_iter(data=True):
                 data['effective_distance'] = parameter - log(data['transition_rate'])
         
         DPED_dic = shortest_path_length(self.graph, source=source, target=target, weight="effective_distance")
@@ -253,7 +258,7 @@ class EffectiveDistances:
         
         eye = np.eye( self.nodes-1,self.nodes-1 )*exp(parameter)
         RWED = np.zeros( (self.nodes, self.nodes) )
-        for t in targets: #go through all possible target nodes
+        for t in tqdm(targets): #go through all possible target nodes
             P_min = np.delete(P,t,0) # remove the column, which corresponds to the target node
             P_min = np.delete(P_min,t,1) # and the row. P_min is the minor Matrix 
             p_min = P[:,t]  # take the column: jump prob. from any node to the target
@@ -360,7 +365,56 @@ class EffectiveDistances:
             save( saveto, MPED )
         else:
             return MPED
+    
+    ###############################################################################
+    
+    def get_shortest_path_distance(self, source=None, target=None, saveto=""):
+        """
+        Compute the (topological) shortest path distance:
+
+        Parameters
+        ----------
+             source : int or None
+                If source is None, the distances from all nodes to the target is calculated
+                Otherwise the integer has to correspond to a node index
+            
+            target : int or None
+                If target is None, the distances from the source to all other nodes is calculated
+                Otherwise the integer has to correspond to a node index
+                
+            saveto : string
+                If empty, the result is saved internally in self.dominant_path_distance           
+                
+        Returns:
+        --------
+            dominant_path_distance : ndarray or float
+                If source and target are specified, a float value is returned that specifies the distance.
+                
+                If either source or target is None a numpy array is returned.
+                The position corresponds to the node ID. 
+                shape = (Nnodes,)
+                
+                If both are None a numpy array is returned.
+                Each row corresponds to the node ID. 
+                shape = (Nnodes,Nnodes)
+        """    
         
+        assert isinstance(saveto,str)
+        assert self.graph != None, "Load graph first."        
+        
+        SPD_dic = shortest_path_length(self.graph, source=source, target=target)
+        
+        if source is None and target is None:
+            SPD = np.array([SPD_dic[s].values() for s in xrange(self.nodes)]).transpose()
+        elif (source is None) != (target is None):
+            SPD = array(SPD_dic.values())
+        else:
+            SPD = SPD_dic
+        if saveto is not "":
+            save( saveto, SPD )
+        else:
+            return SPD
+            
 ###############################################################################
     
 if __name__ == "__main__":
@@ -382,7 +436,7 @@ if __name__ == "__main__":
     print '---------'
     print '---------'
     print '---------'
-    print 'Effective Distances'
+    print '------------------- Effective Distances ---------------------------'
     print '---------'
     print 'Required modules:'
     print 'Python:   tested for: %s.  Yours: %s'    % (vers_python0, vers_python)
@@ -394,10 +448,11 @@ if __name__ == "__main__":
     print '--------'
     print '--------\n'
     
-    G = EffectiveDistances("data/US_largest500_airportnetwork.csv", verbose=False, dtype=int)
+    G = EffectiveDistances("/home/andreasko/effective_distance/line_graph.txt", verbose=False, dtype=int)
     #distances = G.get_dominant_path_distance(source=1, target=100, parameter=1, saveto="")
     #print "Dominant Path Effective Distance :", distances
-    distances = G.get_multiple_path_distance(source=10, target=100, parameter=1, cutoff=3, saveto="")
+    #distances = G.get_dominant_path_distance(source=0, target=None, parameter=3., saveto="/home/andreasko/effective_distance/line_graph_DPED")
+    distances = G.get_multiple_path_distance(source=0, target=None, parameter=3., saveto="/home/andreasko/effective_distance/line_graph_MPED")
     print "Multiple Path Effective Distance :", distances
     #distances = G.get_random_walk_distance(source=1, target=100, parameter=1, saveto="")
     #print "Random Walk Effective Distance   :", distances
