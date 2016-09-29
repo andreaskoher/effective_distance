@@ -1,20 +1,19 @@
 
 # Effective Distances on Complex Networks
 
-The effective distance is an alternative distance metric, which takes into account the local topology of the network and the fluxes along the edges. It has been introduced to predict the time that an infection needs in order to spread from a given source node to a specific target.
-The different approaches are based on the intuition, that large fluxes and few neighbours decrease the transmission time to an adjacent node.
+The effective distance is a distance metric, which takes into account the local topology of the network and the fluxes along the edges. It has been introduced to predict the time that an infection needs in order to spread from a given source node to a specific target.
 
-We provide a set of methods, which allow to compare different approaches:
+Here, we provide python based methods for three different approaches. They are all based on the intuition, that large fluxes and few neighbours decrease the transmission time to an adjacent. For more information on the underlying idea, checkout the following publications:
 
 #### 1. Pathogens can spread along multiple paths
-Gautreau, A., Barrat, A. and Barthelemy, M., _Global disease spread: Statistics and estimation of arrival times_, J. Theor. Biol. __251__, 3, 509 (2008)
+Gautreau, A., Barrat, A. and Barthelemy, M., [_Global disease spread: Statistics and estimation of arrival times_](https://arxiv.org/abs/0801.1846), J. Theor. Biol. __251__, 3, 509 (2008)
 
 #### 2. Only the most dominant path is considered
 Gautreau, A., Barrat, A. and Barthelemy, M., _Global disease spread: Statistics and estimation of arrival times_, J. Theor. Biol. __251__, 3, 509 (2008)  
-Brockmann, D. and Helbing, D., _The hidden geometry of complex, network-driven contagion phenomena_, Science __342__, 6164, 1337 (2013)
+Brockmann, D. and Helbing, D., [_The hidden geometry of complex, network-driven contagion phenomena_](http://science.sciencemag.org/content/342/6164/1337), Science __342__, 6164, 1337 (2013)
 
 #### 3. Random Walk based approach
-Iannelli, F., Koher, A., Hoevel, P. and Sokolov, I.M. _Effective Distances in Complex Networks_ (in preparation)
+Iannelli, F., Koher, A., Hoevel, P. and Sokolov, I.M. [_Effective Distances for Epidemics spreading on Complex Networks_](https://arxiv.org/abs/1608.06201), arXiv:1608.06201 (2016)
 
 ---
 # Required Software
