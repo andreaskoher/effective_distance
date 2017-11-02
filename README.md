@@ -1,28 +1,27 @@
 
 # Effective Distances on Complex Networks
 
-The effective distance is an alternative distance metric, which takes into account the local topology of the network and the fluxes along the edges. It has been introduced to predict the time that an infection needs in order to spread from a given source node to a specific target.
-The different approaches are based on the intuition, that large fluxes and few neighbours decrease the transmission time to an adjacent node.
+The effective distance is a distance metric, which takes into account the local topology of the network and the fluxes along the edges. It has been introduced to predict the time that an infection needs in order to spread from a given source node to a specific target.
 
-We provide a set of methods, which allow to compare different approaches:
+Here, we provide python based methods for three different approaches. They are all based on the intuition, that large fluxes and few neighbours decrease the transmission time to an adjacent. For more information on the underlying idea, checkout the following publications:
 
 #### 1. Pathogens can spread along multiple paths
-Gautreau, A., Barrat, A. and Barthelemy, M., _Global disease spread: Statistics and estimation of arrival times_, J. Theor. Biol. __251__, 3, 509 (2008)
+Gautreau, A., Barrat, A. and Barthelemy, M., [_Global disease spread: Statistics and estimation of arrival times_](https://arxiv.org/abs/0801.1846), J. Theor. Biol. __251__, 3, 509 (2008)
 
 #### 2. Only the most dominant path is considered
 Gautreau, A., Barrat, A. and Barthelemy, M., _Global disease spread: Statistics and estimation of arrival times_, J. Theor. Biol. __251__, 3, 509 (2008)  
-Brockmann, D. and Helbing, D., _The hidden geometry of complex, network-driven contagion phenomena_, Science __342__, 6164, 1337 (2013)
+Brockmann, D. and Helbing, D., [_The hidden geometry of complex, network-driven contagion phenomena_](http://science.sciencemag.org/content/342/6164/1337), Science __342__, 6164, 1337 (2013)
 
 #### 3. Random Walk based approach
-Iannelli, F., Koher, A., Hoevel, P. and Sokolov, I.M. _Effective Distances in Complex Networks_ (in preparation)
+Iannelli, F., Koher, A., Hoevel, P. and Sokolov, I.M. [_Effective Distances for Epidemics spreading on Complex Networks_](https://arxiv.org/abs/1608.06201), arXiv:1608.06201 (2016)
 
 ---
 # Required Software
 
-Please download the files either using the [link](https://gitlab.tubit.tu-berlin.de/hoevel_group/effective_distance/repository/archive.zip "Download all files.") or, open a terminal and type
+Please download the files either using the link or, open a terminal and type
 
 ```
-git clone git@gitlab.tubit.tu-berlin.de:hoevel_group/effective_distance.git 
+git clone https://github.com/andreaskoher/effective_distance.git
 ```
 The user name and password are the same as for the TUBIT account.
 
@@ -63,7 +62,7 @@ import effective_distance as ed
 
 We assume, that the mobility network is stored in a comma separated file (.csv) following the convention SOURCE, TARGET, FLUX. The node IDs are interpreted as integers and have to run from 0 to number_of_nodes - 1. The fluxes have to be positive and will be saved as float numbers.
 ```python
-myEffectiveDistance = ed.EffectiveDistances("data/US_largest500_airportnetwork.csv")
+myEffectiveDistance = ed.EffectiveDistances("US_largest500_airportnetwork.csv")
 ```
 The graph is now stored in the attribute myEffectiveDistance.graph as a NetworkX type DiGraph. In order to avoid singularities in later calculations, the giant strongly connected component has been stored only.
 
