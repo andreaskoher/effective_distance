@@ -1,8 +1,9 @@
 import numpy as np
 from numpy import genfromtxt, log, array, exp, save
 from networkx import DiGraph, shortest_path_length, adjacency_matrix, shortest_path, all_simple_paths, strongly_connected_component_subgraphs
-from scipy.linalg import inv
+from scipy.sparse.linalg import inv
 from tqdm import tqdm
+from scipy.sparse import diags, eye
 
 ###############################################################################
 
@@ -121,12 +122,12 @@ class EffectiveDistances:
         
         
         
-        for u, v, data in G.edges_iter(data=True):
+        for u, v, data in G.edges(data=True):
             weight = G.out_degree(u,weight='weight')
             data['transition_rate'] = 1.*data['weight']/weight
         
         
-        for u, v, data in G.edges_iter(data=True):
+        for u, v, data in G.edges(data=True):
             data['effective_distance'] = 1. - log(data['transition_rate'])
         
         if verbose:
@@ -188,7 +189,7 @@ class EffectiveDistances:
         assert self.graph != None, "Load graph first."        
         
         if parameter != 1:
-            for n,m,data in self.graph.edges_iter(data=True):
+            for n,m,data in self.graph.edges(data=True):
                 data['effective_distance'] = parameter - log(data['transition_rate'])
         
         DPED_dic = shortest_path_length(self.graph, source=source, target=target, weight="effective_distance")
@@ -248,36 +249,26 @@ class EffectiveDistances:
         assert isinstance(saveto,str)
         assert self.graph != None, "Load graph first."        
         
-        P = array(adjacency_matrix(self.graph, weight="transition_rate").todense())
+        P = adjacency_matrix(self.graph, weight="transition_rate").tocsc()
         assert np.all(np.isclose(P.sum(axis=1), 1, rtol=1e-15)), "The transition matrix has to be row normalized"
         
-        if target is not None:
-            targets = [target]
-        else:
-            targets = range(self.nodes)
-        
-        eye = np.eye( self.nodes-1,self.nodes-1 )*exp(parameter)
-        RWED = np.zeros( (self.nodes, self.nodes) )
-        for t in tqdm(targets): #go through all possible target nodes
-            P_min = np.delete(P,t,0) # remove the column, which corresponds to the target node
-            P_min = np.delete(P_min,t,1) # and the row. P_min is the minor Matrix 
-            p_min = P[:,t]  # take the column: jump prob. from any node to the target
-            p_min = np.delete(p_min,t) # and remove one entry
-            RWED[t,:] = -np.log( np.insert( np.dot( inv( eye-P_min),p_min),t,1))
-        
-        if source is not None and target is not None:
-            RWED = RWED[target, source]
-        elif (source is None) != (target is None):
-            if source is None:
-                RWED = RWED[target,:]
+        one = eye( self.nodes, format="csc")
+        Z = inv( one - P * np.exp(-parameter))
+        D = diags(1./Z.diagonal(), format="csc")
+        RWED = -np.log( Z.dot(D).toarray() )
+
+        if source is not None:
+            if target is not None:
+                RWED = RWED[source, target]
             else:
-                RWED = RWED[:,source]
-        
+                RWED = RWED[source,:]
+        elif target is not None:
+            RWED = RWED[:,target]
+
         if saveto is not "":
             save( saveto, RWED )
-        else:
-            return RWED
         
+        return RWED
     
     ###############################################################################
     
